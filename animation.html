@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Animacja</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f0f0f0;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 900px;
+            height: 600px;
+            border: 2px solid #000;
+            background-color: #fff;
+            text-align: center;
+        }
+
+        .svg-container {
+            position: relative;
+            width: 900px;
+            height: 600px;
+            text-align: center;
+        }
+
+        canvas {
+            display: block;
+
+        }
+
+        .control-container {
+            margin-top: 20px;
+        }
+
+        .control-label {
+            margin-left: 10px;
+        }
+
+        .radius-slider {
+            width: 200px;
+        }
+        .size-slider {
+            width: 200px;
+        }
+
+        .color-picker {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Przesuwanie figur -Canvas- </h1>
+    <div class="canvas-container">
+        <canvas id="canvas" width="900" height="600"></canvas>
+        <h1>Kulki -Canvas-</h1>
+        <div class="control-container">
+            <label class="control-label" for="radius">Promień kulki 1:</label>
+            <input class="radius-slider" type="range" id="radius1" min="10" max="50" value="25"></label>
+            <br>
+            <label class="control-label" for="radius">Promień kulki 2:</label>
+            <input class="radius-slider" type="range" id="radius2" min="10" max="50" value="25"></label>
+            <br>
+            <label class="control-label" for="color1">Kolor kulki 1:</label>
+            <input class="color-picker" type="color" id="color1" value="#FF204E">
+            <br><label class="control-label" for="color2">Kolor kulki 2:</label>
+            <input class="color-picker" type="color" id="color2" value="#00224D">
+            <br>
+        </div>
+        <div class="canvas-container">
+            <canvas id="canvas-ball" width="900" height="600"></canvas>
+            <h1>Narysuj linię -Canvas-</h1>
+            <div class="control-container">
+                <button onClick="clearCanvas()">Oczyść pole</button>
+                <br>
+                <label class="control-label" for="line">Szerokość linii</label>
+                <input class="size-slider" type="range" id="line" min="1" max="25" value="5"></label>
+                <br>
+                <label class="control-label" for="color">Kolor:</label>
+                <input class="color-picker" type="color" id="color" value="#FF204E">
+                <br>
+            </div>
+            <div class="canvas-container">
+                <canvas id="canvas-cursor" width="900" height="600"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+    <!--Balls-->
+
+    <script type="text/javascript">
+        var canvasBall;
+        var ctxBall;
+        var WIDTH_BALL = 900;
+        var HEIGHT_BALL = 600;
+
+        var ball1 = { x: 50, y: 150, radius: 25, dx: 3, dy: 7, color: "#FF204E" };
+        var ball2 = { x: 350, y: 150, radius: 25, dx: 3, dy: 2, color: "#00224D" };
+
+        function circle(ball) {
+            ctxBall.beginPath();
+            ctxBall.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2, true);
+            ctxBall.fillStyle = ball.color;
+            ctxBall.fill();
+            ctxBall.closePath();
+        }
+
+        function clearBall() {
+            ctxBall.clearRect(0, 0, WIDTH_BALL, HEIGHT_BALL);
+        }
+
+        function initBall() {
+            canvasBall = document.getElementById("canvas-ball");
+            ctxBall = canvasBall.getContext("2d");
+            return setInterval(drawBall, 10);
+        }
+
+        function drawBall() {
+            clearBall();
+            ctxBall.fillStyle = "#FAF7F8";
+            ctxBall.fillRect(0, 0, WIDTH_BALL, HEIGHT_BALL);
+            circle(ball1);
+            ball1.x += ball1.dx;
+            ball1.y += ball1.dy;
+
+            if (ball1.x + ball1.radius > WIDTH_BALL || ball1.x - ball1.radius < 0) ball1.dx = -ball1.dx;
+            if (ball1.y + ball1.radius > HEIGHT_BALL || ball1.y - ball1.radius < 0) ball1.dy = -ball1.dy;
+            circle(ball2);
+            ball2.x += ball2.dx;
+            ball2.y += ball2.dy;
+
+            if (ball2.x + ball2.radius > WIDTH_BALL || ball2.x - ball2.radius < 0) ball2.dx = -ball2.dx;
+            if (ball2.y + ball2.radius > HEIGHT_BALL || ball2.y - ball2.radius < 0) ball2.dy = -ball2.dy;
+            var dx = ball2.x - ball1.x;
+            var dy = ball2.y - ball1.y;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < ball1.radius + ball2.radius) {
+                ball1.dx = -ball1.dx;
+                ball1.dy = -ball1.dy;
+                ball2.dx = -ball2.dx;
+                ball2.dy = -ball2.dy;
+            }
+        }
+
+        function changeBall() {
+            var radius1 = parseInt(document.getElementById("radius1").value);
+            var radius2 = parseInt(document.getElementById("radius2").value);
+            ball1.radius = radius1;
+            ball2.radius = radius2;
+
+            var color1 = document.getElementById("color1").value;
+            var color2 = document.getElementById("color2").value;
+
+            ball1.color = color1;
+            ball2.color = color2;
+        }
+
+
+        document.getElementById("radius1").addEventListener("input", changeBall);
+        document.getElementById("radius2").addEventListener("input", changeBall);
+        document.getElementById("color1").addEventListener("input", changeBall);
+        document.getElementById("color2").addEventListener("input", changeBall);
+
+        initBall();
+    </script>
+
+
+    <!--Kwadraty-->
+    <script type="text/javascript">
+        var canvas;
+        var ctx;
+        var WIDTH = 900;
+        var HEIGHT = 600;
+
+        var square1 = { x: 75, y: 50, size: 50, color: '#401F71', dragging: false };
+        var square2 = { x: 550, y: 300, size: 50, color: '#FDAF7B', dragging: false };
+
+        function rect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.rect(x, y, w, h);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function clear() {
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        }
+
+        function init() {
+            canvas = document.getElementById("canvas");
+            ctx = canvas.getContext("2d");
+            canvas.onmousedown = myDown;
+            canvas.onmouseup = myUp;
+            canvas.onmousemove = myMove;
+            return setInterval(draw, 10);
+        }
+
+        function draw() {
+            clear();
+            rect(0, 0, WIDTH, HEIGHT, "#FAF7F8");
+            rect(square1.x - square1.size / 2, square1.y - square1.size / 2, square1.size, square1.size, square1.color);
+            rect(square2.x - square2.size / 2, square2.y - square2.size / 2, square2.size, square2.size, square2.color);
+        }
+
+        function myMove(e) {
+            var rect = canvas.getBoundingClientRect();
+            var mouseX = e.clientX - rect.left;
+            var mouseY = e.clientY - rect.top;
+
+            if (square1.dragging) {
+                square1.x = mouseX;
+                square1.y = mouseY;
+            } else if (square2.dragging) {
+                square2.x = mouseX;
+                square2.y = mouseY;
+            }
+        }
+
+        function myDown(e) {
+            var rect = canvas.getBoundingClientRect();
+            var mouseX = e.clientX - rect.left;
+            var mouseY = e.clientY - rect.top;
+
+            if (isInside(mouseX, mouseY, square1)) {
+                square1.dragging = true;
+            } else if (isInside(mouseX, mouseY, square2)) {
+                square2.dragging = true;
+            }
+        }
+
+        function myUp() {
+            square1.dragging = false;
+            square2.dragging = false;
+        }
+
+        function isInside(mouseX, mouseY, square) {
+            return mouseX > square.x - square.size / 2 && mouseX < square.x + square.size / 2 &&
+                mouseY > square.y - square.size / 2 && mouseY < square.y + square.size / 2;
+        }
+
+        init();
+    </script>
+
+    <script type="text/javascript">
+        var canvasCursor = document.getElementById("canvas-cursor");
+        var ctxCursor = canvasCursor.getContext("2d");
+        var prevX, prevY;
+        var isDrawing = false;
+        var cursorColor="#FF204E";
+        var cursorSize=5;
+
+        function drawLine(x1, y1, x2, y2) {
+            ctxCursor.beginPath();
+            ctxCursor.moveTo(x1, y1);
+            ctxCursor.lineTo(x2, y2);
+            ctxCursor.strokeStyle = cursorColor;
+            ctxCursor.lineWidth = cursorSize;
+            ctxCursor.stroke();
+            ctxCursor.closePath();
+        }
+
+        function clearCanvas() {
+            ctxCursor.clearRect(0, 0, canvasCursor.width, canvasCursor.height);
+        }
+
+        canvasCursor.addEventListener("mousedown", function (e) {
+            isDrawing = true;
+            prevX = e.clientX - canvasCursor.getBoundingClientRect().left;
+            prevY = e.clientY - canvasCursor.getBoundingClientRect().top;
+        });
+
+        canvasCursor.addEventListener("mousemove", function (e) {
+            if (isDrawing) {
+                var currentX = e.clientX - canvasCursor.getBoundingClientRect().left;
+                var currentY = e.clientY - canvasCursor.getBoundingClientRect().top;
+                drawLine(prevX, prevY, currentX, currentY);
+                prevX = currentX;
+                prevY = currentY;
+            }
+        });
+
+        canvasCursor.addEventListener("mouseup", function () {
+            isDrawing = false;
+        });
+
+        canvasCursor.addEventListener("mouseleave", function () {
+            isDrawing = false;
+        });
+
+        canvasCursor.addEventListener("touchstart", function (e) {
+            isDrawing = true;
+            prevX = e.touches[0].clientX - canvasCursor.getBoundingClientRect().left;
+            prevY = e.touches[0].clientY - canvasCursor.getBoundingClientRect().top;
+        });
+
+        canvasCursor.addEventListener("touchmove", function (e) {
+            if (isDrawing) {
+                var currentX = e.touches[0].clientX - canvasCursor.getBoundingClientRect().left;
+                var currentY = e.touches[0].clientY - canvasCursor.getBoundingClientRect().top;
+                drawLine(prevX, prevY, currentX, currentY);
+                prevX = currentX;
+                prevY = currentY;
+            }
+        });
+
+        canvasCursor.addEventListener("touchend", function () {
+            isDrawing = false;
+        });
+
+        canvasCursor.addEventListener("touchcancel", function () {
+            isDrawing = false;
+        });
+
+        canvasCursor.addEventListener("touchleave", function () {
+            isDrawing = false;
+        });
+
+        canvasCursor.addEventListener("contextmenu", function (e) {
+            e.preventDefault();
+        });
+
+
+        function changeCursor() {
+            var color = document.getElementById("color").value;
+            var sizel = parseInt(document.getElementById("line").value);
+
+            cursorColor=color;
+
+            cursorSize=sizel;
+        }
+
+
+        document.getElementById("line").addEventListener("input", changeCursor);
+        document.getElementById("color").addEventListener("input", changeCursor);
+
+    </script>
+</body>
+
+</html>
